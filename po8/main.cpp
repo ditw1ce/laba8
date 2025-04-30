@@ -4,7 +4,7 @@
 #include "filters.h"
 
 int main() {
-    auto runners = read_runners("datarunners.txt");
+    auto runners = read_runners("data.txt");
 
     // Фильтрация 1: Участники из "Спартака"
     auto spartak = filter_by_club(runners, "Спартак");
