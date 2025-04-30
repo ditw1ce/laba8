@@ -1,40 +1,43 @@
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include "marathon_runner.h"
 #include "file_reader.h"
 #include "filters.h"
-#include "sorts.h"  // Подключаем заголовочный файл с сортировками
+#include "sorts.h"
+
+std::string format_time(int seconds) {
+    int hours = seconds / 3600;
+    int minutes = (seconds % 3600) / 60;
+    int sec = seconds % 60;
+
+    std::stringstream ss;
+    ss << std::setw(2) << std::setfill('0') << hours << ":"
+        << std::setw(2) << std::setfill('0') << minutes << ":"
+        << std::setw(2) << std::setfill('0') << sec;
+    return ss.str();
+}
 
 int main() {
+    setlocale(LC_ALL, "Russian");
+
     auto runners = read_runners("data.txt");
 
-    // Фильтрация 1: Участники из "Спартака"
+    // Участники Спартака (сортировка пузырьком)
     auto spartak = filter_by_club(runners, "Спартак");
+    bubble_sort_by_club_surname(spartak);
 
-    // Сортировка участников из Спартака по времени забега (возрастание)
-    quick_sort_by_time(spartak);
-
-    std::cout << "=== Участники из Спартака (отсортированы по времени) ===\n";
+    std::cout << "=== Участники из Спартака ===\n";
     for (const auto& r : spartak) {
-        int result = r.finish_time - r.start_time;
-        std::cout << r.surname << " " << r.name << " — "
-            << result / 3600 << ":"
-            << (result % 3600) / 60 << ":"
-            << result % 60 << "\n";
+        std::cout << r.surname << " | Время: " << format_time(r.finish_time - r.start_time) << "\n";
     }
 
-    // Фильтрация 2: Результат лучше 2:50:00 (10200 секунд)
-    auto best = filter_by_result(runners, 10200);
+    // Все участники (быстрая сортировка)
+    quick_sort_by_time(runners);
 
-    // Сортировка лучших результатов по клубу и фамилии (возрастание)
-    bubble_sort_by_club_surname(best);
-
-    std::cout << "\n=== Лучшие результаты (отсортированы по клубу и фамилии) ===\n";
-    for (const auto& r : best) {
-        int result = r.finish_time - r.start_time;
-        std::cout << r.surname << " " << r.name << " — "
-            << result / 3600 << ":"
-            << (result % 3600) / 60 << ":"
-            << result % 60 << "\n";
+    std::cout << "\n=== Все участники ===\n";
+    for (const auto& r : runners) {
+        std::cout << r.surname << " | Время: " << format_time(r.finish_time - r.start_time) << "\n";
     }
 
     return 0;
